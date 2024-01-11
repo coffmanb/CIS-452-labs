@@ -1,9 +1,14 @@
 #include <stdio.h>
-//Initial project setup for building
+#include <math.h>
 
-int main(void)
+int main()
 {
-    printf("Hello world\n");
+    double num = 0.0;
+    
+    printf ("Hello, world.\n");
+    num = pow(2, 28);
+    printf ("You are the %f person to write this program!\n", num);
 
-    return 0;
+    return 0; // The normal exit of a program has a return value of 0
+    
 }
