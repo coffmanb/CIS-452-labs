@@ -6,19 +6,21 @@ int main()
 {
     char *data1, *data2;
     int i;
-    do 
+    do
     {
         data1 = malloc (SIZE);
         printf ("Please input your eos username: ");
         scanf ("%s", data1);
         if (!strcmp (data1, "quit"))
             break;
-            
+
         data2 = malloc (SIZE);
         for (i=0; i<SIZE; i++)  data2[i] = data1[i];
 
         free (data1);
         printf ("data2 :%s:\n", data2);
+        free (data2); //data2 was not free then malloc was done a second time
     } while (1);
-        
-        return 0;}
+
+        return 0;
+}
