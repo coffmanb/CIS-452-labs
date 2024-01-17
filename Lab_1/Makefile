@@ -2,7 +2,7 @@ CC=gcc
 DEBUG=gdb
 
 PROJECT=$(shell basename $(CURDIR))
-TARGET=main.c
+TARGET=q1.c
 
 all: build/$(PROJECT)
 
