@@ -21,7 +21,7 @@ int main()
         exit(1);
     }
     else {
-        wait(&child);
+        child = wait(&pid);
         printf("Child PID %ld terminated with return status %d\n", (long)
         child, status);
     }
