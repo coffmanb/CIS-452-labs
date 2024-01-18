@@ -25,7 +25,7 @@ int main(void)
     puts("Enter a command to execute");
     char* userInput = fgets(command, max_char, stdin);
 
-    while(strcmp(userInput, "quit") != 0)
+    while(1)
     {
         /*
             The following code to read the input is from ChatGPT. This line changes the
