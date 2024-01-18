@@ -6,16 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-void getUsageStats(void)
-{
-    struct rusage usage;
-    getrusage(RUSAGE_CHILDREN, &usage);
+void getUsageStats(void);
 
-    printf("CPU time used by the child process: %ld.%06ld seconds\n", 
-        usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
-    printf("involuntary context switches by the child process: %ld\n", 
-        usage.ru_nivcsw);
-}
 int main(void)
 {
     // Max of 100 characters in input line
@@ -56,24 +48,32 @@ int main(void)
 
         
         pid_t pid;
+        char first_four_chars[4] = { userInput[0], userInput[1], userInput[2], userInput[3] };
 
-        if(strcmp(userInput, "quit") == 0)
+        // Check to see if user wants to exit program
+        if(strcmp(first_four_chars, "quit") == 0)
         {
-            break;
+            exit(1);
         }
 
+        // Create chid process
         if ((pid = fork()) < 0)
         {
             fprintf(stderr, "Fork failure");
             exit(1);
         }
+        
+        // In child process
         else if (pid == 0)
         {
+            // Check command provided
             if (count < 1)
             {
                 fputs("Usage: must supply a command\n", stderr);
                 exit(1);
             }
+
+            // No arguments provided will exit
             if (execvp(args[0], &args[0]) < 0)
             {
                 exit(1);
@@ -89,4 +89,15 @@ int main(void)
     }
 
     return 0;
+}
+
+void getUsageStats(void)
+{
+    struct rusage usage;
+    getrusage(RUSAGE_CHILDREN, &usage);
+
+    printf("CPU time used by the child process: %ld.%06ld seconds\n", 
+        usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
+    printf("involuntary context switches by the child process: %ld\n", 
+        usage.ru_nivcsw);
 }
