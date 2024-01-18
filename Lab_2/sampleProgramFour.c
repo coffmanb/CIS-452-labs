@@ -1,3 +1,10 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Two Programming Assignment
+******************************************/
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -46,7 +53,6 @@ int main(void)
         // last element is NULL
         args[count] = NULL;
 
-        
         pid_t pid;
         char first_four_chars[4] = { userInput[0], userInput[1], userInput[2], userInput[3] };
 
@@ -56,7 +62,7 @@ int main(void)
             exit(1);
         }
 
-        // Create chid process
+        // Create child process
         if ((pid = fork()) < 0)
         {
             fprintf(stderr, "Fork failure");
@@ -73,12 +79,14 @@ int main(void)
                 exit(1);
             }
 
-            // No arguments provided will exit
+            // Stop process and execute user command
             if (execvp(args[0], &args[0]) < 0)
             {
                 exit(1);
             }
         }
+
+        // In parent process
         else
         {
             wait(&pid);
@@ -91,6 +99,10 @@ int main(void)
     return 0;
 }
 
+/*
+    From ChatGPT. Used to calculate the stats behind CPU time used and
+    involuntary context switches by the child process.
+*/
 void getUsageStats(void)
 {
     struct rusage usage;
