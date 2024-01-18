@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,9 +46,9 @@ int main(void)
         args[count] = NULL;
         pid_t child, pid;
 
-        while(strcmp(userInput, "quit") == 0)
+        if(strcmp(userInput, "quit") == 0)
         {
-            return 0;
+            break;
         }
 
         if ((pid = fork()) < 0)
@@ -74,5 +75,13 @@ int main(void)
             char* userInput = fgets(command, max_char, stdin);
         }
     }
+
+    struct rusage usage;
+    getrusage(RUSAGE_CHILDREN, &usage);
+
+    printf("CPU time used by the child process: %ld.%06ld seconds\n", 
+        usage.ru_utime.tv_sec, usage.ru_utime.tv_usec);
+    printf("involuntary context switches by the child process: %ld\n", 
+        usage.ru_nivcsw);
     return 0;
 }
