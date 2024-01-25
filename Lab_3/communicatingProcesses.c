@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 #define READ 0
 #define WRITE 1
@@ -17,7 +18,7 @@ int main()
     pid = fork();
     if(pid < 0) // Fork failed
     {
-        perror("Fork failed");
+        perror("Fork failed\n");
         exit(1);
     }
 
@@ -30,20 +31,17 @@ int main()
             random = 1 + rand()%4;
             sleep(random);
             random = rand()%2;
-            pid = fork();
-            if(pid == 0) // Grandchild process
-            {
-                exit(random ? SIGUSR1 :SIGUSR2);
-            }
+            kill(getppid(), random ? SIGUSR1 :SIGUSR2);
         }
     }
     else
     {
         installSigHandlers();
-        printf("spawned child PID# %d", pid);
+        printf("spawned child PID# %d\n", pid);
         while(1)
         {
-            printf("waiting...");
+            printf("waiting...\t");
+            fflush(stdout);
             pause();
             installSigHandlers();
         }
@@ -62,16 +60,16 @@ void sigHandler(int sigNum)
 {
     if(sigNum == SIGINT)
     {
-        printf("\t received shutting down\n");
+        printf(" received shutting down\n");
         exit(0);
     }
     else if(sigNum == SIGUSR1)
-        printf("\treceived a SIGUSR1 signal.\n");
+        printf("received a SIGUSR1 signal.\n");
     else if(sigNum == SIGUSR2)
-        printf("\treceived a SIGUSR1 signal.\n");
+        printf("received a SIGUSR2 signal.\n");
     else
     {
-        printf("\t unknown condition exiting");
+        printf("unknown condition exiting");
         exit(0);
     }
 }
