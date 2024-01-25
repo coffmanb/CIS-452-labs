@@ -2,15 +2,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 #define READ 0
 #define WRITE 1
 
-#define SIGUSR1 188
-#define SIGUSR2 189
-
-void sigHandler1 (int);
-void sigHandler2 (int);
+void sigHandler1(int);
+void sigHandler2(int);
+void installSigHandlers(void);
 
 int main()
 {
@@ -30,9 +29,13 @@ int main()
         while(1)
         {
             random = 1 + rand()%4;
-            wait(random);
+            sleep(random);
             random = rand()%2;
-
+            pid = fork();
+            if(pid == 0) // Child process
+            {
+                kill(getpid(), random ? SIGUSR1 :SIGUSR2);
+            }
         }
     }
     else
