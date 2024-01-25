@@ -6,22 +6,16 @@
 #define READ 0
 #define WRITE 1
 
+#define SIGUSR1 188
+#define SIGUSR2 189
+
 void sigHandler1 (int);
 void sigHandler2 (int);
 
 int main()
 {
-    int fd[2];
-    int pipeCreationResult;
     int pid;
 
-    pipeCreationResult = pipe(fd);
-
-    if(pipeCreationResult < 0)
-    {
-        perror("Failed pipe creation\n");
-        exit(1);
-    }
     pid = fork();
     if(pid < 0) // Fork failed
     {
@@ -29,23 +23,37 @@ int main()
         exit(1);
     }
 
-    int output = 3;
-    int input;
 
     if(pid == 0) // Child process
     { 
-        write(fd[1], &output, sizeof(int));
-        printf("Child wrote [%d]\n", output);
+        int random;
+        while(1)
+        {
+            random = 1 + rand()%4;
+            wait(random);
+            random = rand()%2;
+
+        }
     }
     else
     {
-        read(fd[0], &input, sizeof(int));
-        printf("Parent received [%d] from child process\n", input);
+        installSigHandlers();
+        printf("spawned child PID# %d", pid);
+        while(1)
+        {
+            printf("waiting...");
+            pause();
+            installSigHandlers();
+        }
     }
 
     return 0;
 }
-
+void installSigHandlers(void)
+{
+    signal(SIGUSR1,sigHandler1);
+    signal(SIGUSR2,sigHandler2);
+}
 void sigHandler1 (int sigNum)
 {
    printf("\treceived a SIGUSR1 signal.\n");
