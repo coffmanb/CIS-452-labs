@@ -1,3 +1,10 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Three SampleProgramTwo Modified Code
+******************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
