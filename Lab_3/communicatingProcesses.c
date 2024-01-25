@@ -7,8 +7,7 @@
 #define READ 0
 #define WRITE 1
 
-void sigHandler1(int);
-void sigHandler2(int);
+void sigHandler(int);
 void installSigHandlers(void);
 
 int main()
@@ -32,9 +31,9 @@ int main()
             sleep(random);
             random = rand()%2;
             pid = fork();
-            if(pid == 0) // Child process
+            if(pid == 0) // Grandchild process
             {
-                kill(getpid(), random ? SIGUSR1 :SIGUSR2);
+                exit(random ? SIGUSR1 :SIGUSR2);
             }
         }
     }
@@ -54,15 +53,25 @@ int main()
 }
 void installSigHandlers(void)
 {
-    signal(SIGUSR1,sigHandler1);
-    signal(SIGUSR2,sigHandler2);
-}
-void sigHandler1 (int sigNum)
-{
-   printf("\treceived a SIGUSR1 signal.\n");
+    signal(SIGINT, sigHandler);
+    signal(SIGUSR1, sigHandler);
+    signal(SIGUSR2, sigHandler);
 }
 
-void sigHandler2 (int sigNum)
+void sigHandler(int sigNum)
 {
-    printf("\treceived a SIGUSR2 signal.\n");
+    if(sigNum == SIGINT)
+    {
+        printf("\t received shutting down\n");
+        exit(0);
+    }
+    else if(sigNum == SIGUSR1)
+        printf("\treceived a SIGUSR1 signal.\n");
+    else if(sigNum == SIGUSR2)
+        printf("\treceived a SIGUSR1 signal.\n");
+    else
+    {
+        printf("\t unknown condition exiting");
+        exit(0);
+    }
 }
