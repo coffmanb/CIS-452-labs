@@ -11,6 +11,8 @@ int main()
     int fd[2];
     int pipeCreationResult;
     int pid;
+    char myStringOutput[] = "This a test!";
+    char myStringInput[50];
 
     pipeCreationResult = pipe(fd);
 
@@ -28,16 +30,19 @@ int main()
 
     int output = 3;
     int input;
+    int bytesRead;
 
     if(pid == 0) // Child process
     { 
-        write(fd[1], &output, sizeof(int));
-        printf("Child wrote [%d]\n", output);
+        close(fd[0]);
+        write(fd[1], &myStringOutput, strlen(myStringOutput) + 1);
+        printf("Child wrote [%s]\n", myStringOutput);
     }
     else
     {
-        read(fd[0], &input, sizeof(int));
-        printf("Parent received [%d] from child process\n", input);
+        close(fd[1]);
+        bytesRead = read(fd[0], &myStringInput, 50);
+        printf("Parent received [%s] from child process\n%d bytes were read\n", myStringInput, bytesRead);
     }
     
     return 0;
