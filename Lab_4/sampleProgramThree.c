@@ -1,3 +1,10 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Four sampleProgramThree Code
+******************************************/
+
 #include <pthread.h>
 #include <stdio.h>
 #include <errno.h>

@@ -1,3 +1,10 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Four Blocking Multi Threaded Server
+******************************************/
+
 #include <pthread.h>
 #include <stdio.h>
 #include <errno.h>
@@ -6,7 +13,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define MAX_NUM_THREADS 3
+#define MAX_NUM_THREADS 20
 
 
 typedef struct{
@@ -16,13 +23,14 @@ typedef struct{
 
 pthread_t threads[MAX_NUM_THREADS];
 threadStatus_t threadStatus[MAX_NUM_THREADS];
+int reqCounter = 0;
 
 
 void sigHandler(int);
 void* readFile(void* arg);
 int findAvailableThread(threadStatus_t *threadList);
 
-
+// Treat main method as the dispatch thread. *Not specified
 int main() {
     signal(SIGINT, sigHandler);  // Set up signal handler for SIGINT
 
@@ -38,10 +46,7 @@ int main() {
         threadStatus[thread].status = 1;  // Mark thread as in use
         strcpy(threadStatus[thread].filename, fileName);
         pthread_create(&threads[thread], NULL, readFile, &threadStatus[thread]);
-        for(int i = 0; i < MAX_NUM_THREADS; i++)
-        {
-            printf("thread %d: %d\n", i, threadStatus[i].status);
-        }
+        reqCounter++;
     }
 
     return 0;
@@ -65,7 +70,7 @@ void* readFile(void* myArgument)
 {
     threadStatus_t* threadInfo = (threadStatus_t*)myArgument;
     int sleepTime = rand() % 5;
-    sleep((sleepTime == 0 ? 6 + rand() % 5 : 1));
+    sleep((sleepTime == 0 ? 7 + rand() % 4 : 1));
     printf("Found: %s\n", threadInfo->filename);
     fflush(stdout);
     threadInfo->status = 0;
@@ -81,12 +86,12 @@ void sigHandler(int sigNum)
         // Shut down running threads
         for(int i = 0; i < MAX_NUM_THREADS; i++)
         {
-            printf("thread %d: %d", i, threadStatus[i].status);
             if(threadStatus[i].status == 1)
             {
                 pthread_join(threads[i], NULL);
             }
         }
+        printf("Received %d File Requests.\n", reqCounter);
         printf("All tasks done!\n");
         exit(0);
     }
