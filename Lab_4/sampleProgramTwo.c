@@ -53,6 +53,7 @@ void* doGreeting(void* myArgument){
     
     // Print out a message based on the argument passed to us
     for (int loop = 0; loop < 10; loop++) {
+        sleep(1);
         if (strcmp((char*)myArgument, "hi")==0){
             printf("Hello\n");
         }
