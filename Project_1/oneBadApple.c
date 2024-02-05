@@ -23,13 +23,12 @@ typedef struct {
 } node_t;
 
 void sigHandler();
-void installSigHandlers(void);
 void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode);
 void processApple(node_t node);
 
 
 int main() {
-    installSigHandlers();
+    signal(SIGINT, sigHandler);
     int numNodes;
     int toNode;
     apple_t apple;
@@ -121,11 +120,6 @@ void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode)
         processApple(newNode);
     }
     wait(&pid);
-}
-
-void installSigHandlers(void)
-{
- signal(SIGINT, sigHandler);
 }
 
 void sigHandler()
