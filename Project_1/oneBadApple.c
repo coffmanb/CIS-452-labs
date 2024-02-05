@@ -29,6 +29,7 @@ void processApple(node_t node);
 
 
 int main() {
+    installSigHandlers();
     int numNodes;
     int toNode;
     apple_t apple;
@@ -39,18 +40,14 @@ int main() {
 
     node_t root;
     root.id = 0;
-
     if (pipe(root.forward) == -1 || pipe(root.receive) == -1) {
         perror("Failed pipe creation\n");
         exit(1);
     }
 
-    pid_t root_pid = getpid();  // Keep track of the root process ID
-
     createChildrenNodes(numNodes, &root, &root);
 
     close(root.receive[WRITE]);
-    installSigHandlers();
 
     while (1) {
         printf("Which node would you like to write to? ");
@@ -77,18 +74,21 @@ void processApple(node_t node) {
     pid_t pid = fork();
     if(pid == 0) //child
     {
-        apple_t apple;
-        int bytesRead = read(node.receive[READ], &apple, sizeof(apple_t));
-        printf("Node: %d has received the Apple\n", node.id);
-        if(apple.header == node.id){
-            printf("Apple belongs to %d reading: %s\n", node.id, apple.message);
+        while(1)
+        {
+            apple_t apple;
+            int bytesRead = read(node.receive[READ], &apple, sizeof(apple_t));
+            printf("Node: %d has received the Apple\n", node.id);
+            if(apple.header == node.id){
+                printf("Apple belongs to %d reading: %s\n", node.id, apple.message);
 
-            // Clears the message out
-            memset(apple.message, 0, sizeof(apple.message));
+                // Clears the message out
+                memset(apple.message, 0, sizeof(apple.message));
+            }
+
+            // Pass apple to next node
+            write(node.forward[WRITE], &apple, sizeof(apple_t)); 
         }
-
-        // Pass apple to next node
-        write(node.forward[WRITE], &apple, sizeof(apple_t)); 
     }
     exit(1);
 }
@@ -133,49 +133,3 @@ void sigHandler()
     printf(" received shutting down\n");
     exit(0);    
 }
-
-
-// void oldCreateChildrenNodes()
-// {
-//     int numNodes;
-//     node_t node;
-//     int depth;
-//     apple_t apple;
-//     int bytesRead;
-
-//     node.id += 1;
-
-//     if (numNodes >= 1) {
-//         printf("Node created: %d\n", node.id);
-
-//         if (pipe(node.forward) == -1 || pipe(node.receive) == -1) {
-//             perror("Failed pipe creation\n");
-//             exit(1);
-//         }
-
-//         createNode(depth - 1, node);
-
-//         pid_t pid = fork();
-//         if (pid < 0) {
-//             perror("Fork failed");
-//             exit(1);
-//         }
-//     }
-
-//     while (1) {
-//         bytesRead = read(node.receive[READ], &apple, sizeof(apple_t));
-//         printf("Node %d received the apple\n", apple.header);
-
-//         if (apple.header == node.id) {
-//             printf("Apple is for this node: %s\n", apple.message);
-//             // Clear the message
-//             memset(apple.message, 0, sizeof(apple.message));
-//         } else {
-//             // Process the apple if needed
-//             processApple(node);
-
-//             // Send the apple to the next node
-//             write(node.forward[WRITE], &apple, sizeof(apple_t));
-//         }
-//     }
-// }
