@@ -4,7 +4,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <stdbool.h>
 #include <signal.h>
 #include <sys/wait.h>
 
@@ -22,6 +21,8 @@ typedef struct {
     int id;
 } node_t;
 
+int nodeCount;
+
 void sigHandler();
 void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode);
 void processApple(node_t node);
@@ -36,6 +37,7 @@ int main() {
     printf("How many nodes would you like to create? ");
     fflush(stdout);
     scanf("%d", &numNodes);
+    nodeCount = numNodes;
 
     node_t root;
     root.id = 0;
@@ -77,7 +79,6 @@ void processApple(node_t node) {
         {
             apple_t apple;
             int bytesRead = read(node.receive[READ], &apple, sizeof(apple_t));
-            printf("Node: %d has received the Apple\n", node.id);
             if(apple.header == node.id){
                 printf("Apple belongs to %d reading: %s\n", node.id, apple.message);
 
@@ -86,6 +87,7 @@ void processApple(node_t node) {
             }
 
             // Pass apple to next node
+            printf("Node: %d has sent the Apple to Node: %d\n", node.id, node.id == nodeCount ? 0 : node.id + 1);
             write(node.forward[WRITE], &apple, sizeof(apple_t)); 
         }
     }
