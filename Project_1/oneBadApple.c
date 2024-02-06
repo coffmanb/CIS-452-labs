@@ -87,7 +87,7 @@ void processApple(node_t node) {
             }
 
             // Pass apple to next node
-            printf("Node: %d has sent the Apple to Node: %d\n", node.id, node.id == nodeCount ? 0 : node.id + 1);
+            printf("Node %d has sent the Apple to Node: %d\n", node.id, (node.id+1) % nodeCount);
             write(node.forward[WRITE], &apple, sizeof(apple_t)); 
         }
     }
@@ -98,7 +98,7 @@ void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode)
 {
 
     node_t newNode;
-    newNode.id = numNodes;
+    newNode.id = numNodes-1;
     if(numNodes == 1)
     {
         pid_t pid = fork();
