@@ -36,8 +36,8 @@ int main() {
 
     printf("How many nodes would you like to create? ");
     fflush(stdout);
-    scanf("%d", &numNodes);
-    nodeCount = numNodes;
+    scanf("%d", &nodeCount);
+    getchar();
 
     node_t root;
     root.id = 0;
@@ -46,8 +46,7 @@ int main() {
         exit(1);
     }
 
-    createChildrenNodes(numNodes, &root, &root);
-
+    createChildrenNodes(nodeCount, &root, &root);
     close(root.receive[WRITE]);
 
     while (1) {
@@ -55,9 +54,9 @@ int main() {
         fflush(stdout);
         scanf("%d", &toNode);
 
-        printf("Write a message: ");
+        printf("Enter a message: ");
         fflush(stdout);
-        scanf("%s", apple.message);
+        scanf(" %[^\n]", apple.message); // Read until newline character
 
         // Send the apple to the specified node
         apple.header = toNode;
@@ -65,7 +64,7 @@ int main() {
 
         // Receive the apple back
         read(root.receive[READ], &apple, sizeof(apple_t));
-        printf("Root received the apple back: %s\n", apple.message);
+        printf("Root received the apple back. Apple message: %s\n", strlen(apple.message) > 0 ? apple.message : "empty");
     }
 }
 
@@ -84,6 +83,7 @@ void processApple(node_t node) {
 
                 // Clears the message out
                 memset(apple.message, 0, sizeof(apple.message));
+                printf("Apple message has been cleared\n");
             }
 
             // Pass apple to next node
