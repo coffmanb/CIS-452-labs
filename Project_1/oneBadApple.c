@@ -126,6 +126,6 @@ void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode)
 
 void sigHandler()
 {
-    printf(" received shutting down\n");
+    printf("Process %d shutting down\n", getpid());
     exit(0);    
 }
