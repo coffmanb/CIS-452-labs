@@ -23,6 +23,13 @@ int main ()
     printf("Value a: %p\t Value b: %p\n", (void *) sharedMemoryPtr, (void *)
     sharedMemoryPtr + FOO);
 
+    struct shmid_ds shm_info;
+    if (shmctl(shmId, IPC_STAT, &shm_info) < 0) {
+        perror("Unable to get shared memory information\n");
+        exit(1);
+    }
+    printf("Shared memory segment size: %ld bytes\n", shm_info.shm_segsz);
+
     if(shmdt (sharedMemoryPtr) < 0) {
         perror ("Unable to detach\n");
         exit (1);
