@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <unistd.h>
 
 #define FOO 4096
 int main ()
@@ -20,9 +21,10 @@ int main ()
         exit (1);
     }
 
-    printf("Value a: %p\t Value b: %p\n", (void *) sharedMemoryPtr, (void *)
-    sharedMemoryPtr + FOO);
+    printf("ID of segment: %d\n", shmId);
+    pause();
 
+    // Changes for Q4
     struct shmid_ds shm_info;
     if (shmctl(shmId, IPC_STAT, &shm_info) < 0) {
         perror("Unable to get shared memory information\n");
