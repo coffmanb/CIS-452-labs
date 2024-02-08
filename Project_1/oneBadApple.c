@@ -10,9 +10,17 @@
 #define READ 0
 #define WRITE 1
 
+#define CREATE_PIPE_WITH_ERROR_CHECK(pipeName) \
+    if (pipe(pipeName) == -1)                  \
+    {                                          \
+        perror("Failed pipe creation\n");      \
+        exit(1);                               \
+    }
+
 typedef struct {
     int header;
     char message[100];
+    int lastHeldBy;
 } apple_t;
 
 typedef struct {
@@ -22,13 +30,16 @@ typedef struct {
 } node_t;
 
 int nodeCount;
+node_t node;
 
 void sigHandler();
+void userSigHandler();
 void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode);
-void processApple(node_t node);
+void processApple();
 
 
-int main() {
+int main()
+{
     signal(SIGINT, sigHandler);
     int numNodes;
     int toNode;
@@ -41,15 +52,14 @@ int main() {
 
     node_t root;
     root.id = 0;
-    if (pipe(root.forward) == -1 || pipe(root.receive) == -1) {
-        perror("Failed pipe creation\n");
-        exit(1);
-    }
+    CREATE_PIPE_WITH_ERROR_CHECK(root.forward);
+    CREATE_PIPE_WITH_ERROR_CHECK(root.receive);
+    printf("Created node %d\n", root.id);
 
     createChildrenNodes(nodeCount, &root, &root);
-    close(root.receive[WRITE]);
-
-    while (1) {
+    memcpy(&node, &root, sizeof(node));
+    while (1)
+    {
         printf("Which node would you like to write to? ");
         fflush(stdout);
         scanf("%d", &toNode);
@@ -60,16 +70,20 @@ int main() {
 
         // Send the apple to the specified node
         apple.header = toNode;
+        apple.lastHeldBy = 0;
+        printf("Node %d has received the apple from User\n", node.id);
+        printf("Node %d has sent the Apple to Node: %d\n", node.id, (node.id+1) % nodeCount);
         write(root.forward[WRITE], &apple, sizeof(apple_t));
 
         // Receive the apple back
         read(root.receive[READ], &apple, sizeof(apple_t));
-        printf("Root received the apple back. Apple message: %s\n", strlen(apple.message) > 0 ? apple.message : "empty");
+        printf("Node 0 received the apple back. Apple message: %s\n", 
+                        strlen(apple.message) > 0 ? apple.message : "empty");
     }
 }
 
-void processApple(node_t node) {
-    
+void processApple(void)
+{
     // Listen for the apple and check whether it belongs
     pid_t pid = fork();
     if(pid == 0) //child
@@ -78,7 +92,9 @@ void processApple(node_t node) {
         {
             apple_t apple;
             int bytesRead = read(node.receive[READ], &apple, sizeof(apple_t));
-            if(apple.header == node.id){
+            printf("Node %d has received the apple from %d\n", node.id, apple.lastHeldBy);
+            if(apple.header == node.id)
+            {
                 printf("Apple belongs to %d reading: %s\n", node.id, apple.message);
 
                 // Clears the message out
@@ -88,10 +104,10 @@ void processApple(node_t node) {
 
             // Pass apple to next node
             printf("Node %d has sent the Apple to Node: %d\n", node.id, (node.id+1) % nodeCount);
+            apple.lastHeldBy = node.id;
             write(node.forward[WRITE], &apple, sizeof(apple_t)); 
         }
     }
-    exit(1);
 }
 
 void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode)
@@ -99,33 +115,30 @@ void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode)
 
     node_t newNode;
     newNode.id = numNodes-1;
-    if(numNodes == 1)
-    {
-        pid_t pid = fork();
-        if(pid == 0) //child
-        {
-            memcpy(newNode.receive, rootNode->forward, sizeof(newNode.receive));
-            memcpy(newNode.forward, parentNode->receive, sizeof(newNode.forward));
-            printf("Created node %d\n", newNode.id);
-            processApple(newNode);
-        }
+    if(newNode.id < 1){
         return;
     }
 
-    pid_t pid = fork();
-    if(pid == 0) //child
+    if(newNode.id == 1)
+    {
+        memcpy(newNode.receive, rootNode->forward, sizeof(newNode.receive));
+        memcpy(newNode.forward, parentNode->receive, sizeof(newNode.forward));
+        memcpy(&node, &newNode, sizeof(node));
+        processApple();
+    }
+    else
     {
         memcpy(newNode.forward, parentNode->receive, sizeof(newNode.forward));
-        pipe(newNode.receive);
-        printf("Created node %d\n", newNode.id);
+        CREATE_PIPE_WITH_ERROR_CHECK(newNode.receive);
         createChildrenNodes(numNodes - 1, &newNode, rootNode);
-        processApple(newNode);
+        memcpy(&node, &newNode, sizeof(node));
+        processApple();
     }
-    wait(&pid);
+    printf("Created node %d\n", newNode.id);
 }
 
 void sigHandler()
 {
-    printf("Process %d shutting down\n", getpid());
+    printf("Node %d shutting down\n", node.id);
     exit(0);    
 }
