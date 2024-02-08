@@ -33,7 +33,6 @@ int nodeCount;
 node_t node;
 
 void sigHandler();
-void userSigHandler();
 void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode);
 void processApple();
 
