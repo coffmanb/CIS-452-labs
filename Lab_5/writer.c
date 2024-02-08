@@ -37,7 +37,6 @@ int main() {
     key_t key;
 
     signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
 
     if ((key = ftok("writer.c", 'R')) == -1) {
         perror("Unable to assign key\n");
