@@ -1,3 +1,12 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Five sampleProgramOne.c
+
+Modified sampleProgramOne after completion
+******************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
