@@ -73,9 +73,9 @@ int main() {
 void signal_handler(int sig) {
 
     if (sig == SIGINT){
-        printf("\n^C Recieved shutting down.\n");
+        printf("\n^C Received shutting down.\n");
     } else if (sig == 20){
-        printf("Quit recieved shutting down.\n");
+        printf("Quit received shutting down.\n");
     }
 
     if(shmdt (shared_mem) < 0) {

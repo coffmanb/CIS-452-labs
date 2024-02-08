@@ -67,9 +67,7 @@ int main() {
 void signal_handler(int sig) {
     
     if (sig == SIGINT){
-        printf(" Recieved shutting down.\n");
-    } else if (sig == SIGTERM){
-        printf("\nQuit recieved shutting down.\n");
+        printf(" Received shutting down.\n");
     }
 
     if(shmdt (shared_mem) < 0) {
