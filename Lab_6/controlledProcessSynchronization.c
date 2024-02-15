@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
             exit (1);
         }
 
-        // Free resource so parent can continue execution.
+        // Free resource.
         if (semop(semID, &v, 1) == -1) {
             perror("Semaphore signal failed in child");
             exit(1);
