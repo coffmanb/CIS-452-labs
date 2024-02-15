@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     if(pid == 0) { // Child
 
-        // Child process runs, decrements semaphore to 0 (no more resources now)
+        // Wait for resource to be available from parent signal.
         if (semop(semID, &p, 1) == -1) {
             perror("Semaphore wait failed in child");
             exit(1);
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
             exit (1);
         }
 
-        // Signal ends use of semaphore in child. Resource available.
+        // Free resource so parent can continue execution.
         if (semop(semID, &v, 1) == -1) {
             perror("Semaphore signal failed in child");
             exit(1);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     }
     else
 
-        // Wait for resource to be available from child signal.
+        // Parent process runs, decrements semaphore to 0 (no more resources now)
         if (semop(semID, &p, 1) == -1) {
             perror("Semaphore wait failed in parent");
             exit(1);
@@ -104,11 +104,13 @@ int main(int argc, char *argv[])
             sharedMemoryPointer[1] = temp;
         }
 
+        // Signal ends use of semaphore in parent. Resource available for child.
         if (semop(semID, &v, 1) == -1) {
             perror("Semaphore signal failed in parent");
             exit(1);
         }
 
+        // Wait for child to finish C.S.
         wait(&status);
         printf("Values: %li\t%li\n", sharedMemoryPointer[0], sharedMemoryPointer[1]);
         
