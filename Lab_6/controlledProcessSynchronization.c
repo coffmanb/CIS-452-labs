@@ -1,3 +1,13 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Six controlledProcessSynchronization.c
+
+Program uses semaphore to synchronize use of
+shared memory segment between parent and child
+processes.
+******************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -27,6 +37,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    // By initializing to one, only one process can enter C.S. at a time.
     if (semctl(semID, 0, SETVAL, 1) == -1) {
         perror("Failed to initialize semaphore with value of 1");
         exit(1);
@@ -98,9 +109,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
-        // Don't need wait line below because parent waits for child to
-        // signal once loop ends.
-        // wait(&status);
+        wait(&status);
         printf("Values: %li\t%li\n", sharedMemoryPointer[0], sharedMemoryPointer[1]);
         
         if(shmdt(sharedMemoryPointer) < 0) {

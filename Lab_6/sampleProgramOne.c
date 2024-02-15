@@ -1,3 +1,13 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Six sampleProgramOne.c
+
+Modified program without synchronization
+between parent and child process accessing 
+shared memory segment.
+******************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
