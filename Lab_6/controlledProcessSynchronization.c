@@ -6,6 +6,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
+#include <sys/sem.h>
 
 #define SIZE 16
 
@@ -13,10 +14,23 @@ int main(int argc, char *argv[])
 {
     int status;
     long int i, loop, temp, *sharedMemoryPointer;
-    int sharedMemoryID;
+    int sharedMemoryID, semID;
     pid_t pid;
 
+    struct sembuf p = {0, -1, SEM_UNDO};
+    struct sembuf v = {0, 1, SEM_UNDO};
+
     loop = atoi(argv[1]);
+
+    if ((semID = semget(IPC_PRIVATE, 1, IPC_CREAT | S_IRUSR | S_IWUSR)) == -1) {
+        perror("Failed to create semaphore");
+        exit(1);
+    }
+
+    if (semctl(semID, 0, SETVAL, 1) == -1) {
+        perror("Failed to initialize semaphore with value of 1");
+        exit(1);
+    }
 
     sharedMemoryID = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|S_IRUSR|S_IWUSR);
     if(sharedMemoryID < 0) {
@@ -39,8 +53,14 @@ int main(int argc, char *argv[])
     }
 
     if(pid == 0) { // Child
+
+        // Child process runs, decrements semaphore to 0 (no more resources now)
+        if (semop(semID, &p, 1) == -1) {
+            perror("Semaphore wait failed in child");
+            exit(1);
+        }
+
         for(i=0; i<loop; i++) {
-            // swap the contents of sharedMemoryPointer[0] and sharedMemoryPointer[1]
             temp = sharedMemoryPointer[0];
             sharedMemoryPointer[0] = sharedMemoryPointer[1];
             sharedMemoryPointer[1] = temp;
@@ -50,18 +70,37 @@ int main(int argc, char *argv[])
             perror ("Unable to detach\n");
             exit (1);
         }
-        
+
+        // Signal ends use of semaphore in child. Resource available.
+        if (semop(semID, &v, 1) == -1) {
+            perror("Semaphore signal failed in child");
+            exit(1);
+        }
+
         exit(0);
     }
     else
+
+        // Wait for resource to be available from child signal.
+        if (semop(semID, &p, 1) == -1) {
+            perror("Semaphore wait failed in parent");
+            exit(1);
+        }
+
         for(i=0; i<loop; i++) {
-            // swap the contents of sharedMemoryPointer[1] and sharedMemoryPointer[0]
             temp = sharedMemoryPointer[0];
             sharedMemoryPointer[0] = sharedMemoryPointer[1];
             sharedMemoryPointer[1] = temp;
         }
 
-        wait(&status);
+        if (semop(semID, &v, 1) == -1) {
+            perror("Semaphore signal failed in parent");
+            exit(1);
+        }
+
+        // Don't need wait line below because parent waits for child to
+        // signal once loop ends.
+        // wait(&status);
         printf("Values: %li\t%li\n", sharedMemoryPointer[0], sharedMemoryPointer[1]);
         
         if(shmdt(sharedMemoryPointer) < 0) {
@@ -73,5 +112,11 @@ int main(int argc, char *argv[])
             perror ("Unable to deallocate\n");
             exit(1);
         }
+
+        if (semctl(semID, 0, IPC_RMID) == -1) {
+            perror("Semaphore deallocation failed");
+            exit(1);
+        }
+
     return 0;
 }
