@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <sys/sem.h>
 #include <limits.h>
-#include <sys/semaphore.h>
+#include <sys/sem.h>
 
 int main() {
     int semID;
@@ -19,21 +19,22 @@ int main() {
     }
 
     
-    if (semctl(semID, 0, SETVAL, SEM_VALUE_MAX) == -1) {
+    if (semctl(semID, 0, SETVAL, 0) == -1) {
         perror("Failed to initialize semaphore with value of 1");
         exit(1);
     }
 
     struct sembuf semOp = {0, 0, 0};
-    int i;
+    long long i;
     for (i = 0; i < 10000000; i++) {
+        semOp.sem_op = i;
         if (semop(semID, &semOp, 1) == -1) {
             perror("Failed to perform semaphore wait.");
             break;
         }
     }
 
-    printf("Maximum value of a counting semaphore: %d\n", i);
+    printf("Maximum value of a counting semaphore: %lld\n", i-1);
 
     if (semctl(semID, 0, IPC_RMID) == -1) {
         perror("Semaphore deallocation failed.");
