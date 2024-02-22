@@ -7,6 +7,8 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/sem.h>
+#include <limits.h>
+#include <sys/semaphore.h>
 
 int main() {
     int semID;
@@ -16,16 +18,17 @@ int main() {
         exit(1);
     }
 
-    struct sembuf semOp = {0, 0, 0};
-    if (semop(semID, &semOp, 1) == -1) {
-        perror("Failed to perform semaphore operation.");
+    
+    if (semctl(semID, 0, SETVAL, SEM_VALUE_MAX) == -1) {
+        perror("Failed to initialize semaphore with value of 1");
         exit(1);
     }
 
+    struct sembuf semOp = {0, 0, 0};
     int i;
-    for (i = 0; i < 1000000000; i++) {
-        semOp.sem_op = 1;
+    for (i = 0; i < 10000000; i++) {
         if (semop(semID, &semOp, 1) == -1) {
+            perror("Failed to perform semaphore wait.");
             break;
         }
     }
