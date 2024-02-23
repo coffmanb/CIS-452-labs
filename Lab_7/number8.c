@@ -1,3 +1,12 @@
+
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Seven number8.c
+
+Question 8 in Lab 7
+******************************************/
 #include <stdio.h>
 #include <sys/resource.h>
 

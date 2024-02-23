@@ -1,3 +1,11 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Seven number3.c
+
+Question 3 in Lab 7
+******************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -20,7 +28,7 @@ int main() {
 
     
     if (semctl(semID, 0, SETVAL, 0) == -1) {
-        perror("Failed to initialize semaphore with value of 1");
+        perror("Failed to initialize semaphore with value of 0");
         exit(1);
     }
 

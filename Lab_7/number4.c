@@ -1,3 +1,11 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Seven number4.c
+
+Question 4 in Lab 7
+******************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
