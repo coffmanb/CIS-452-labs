@@ -21,6 +21,7 @@ typedef struct {
     int header;
     char message[100];
     int lastHeldBy;
+
 } apple_t;
 
 typedef struct {
@@ -30,6 +31,7 @@ typedef struct {
 } node_t;
 
 int nodeCount;
+
 node_t node;
 
 void sigHandler();
@@ -69,13 +71,16 @@ int main()
 
         // Send the apple to the specified node
         apple.header = toNode;
-        apple.lastHeldBy = 0;
-        printf("Node %d has received the apple from User\n", node.id);
-        printf("Node %d has sent the Apple to Node: %d\n", node.id, (node.id+1) % nodeCount);
         write(root.forward[WRITE], &apple, sizeof(apple_t));
 
         // Receive the apple back
         read(root.receive[READ], &apple, sizeof(apple_t));
+        printf("Root received the apple back. Apple message: %s\n", strlen(apple.message) > 0 ? apple.message : "empty");
+    }
+}
+
+void processApple(node_t node) {
+    
         printf("Node 0 received the apple back. Apple message: %s\n", 
                         strlen(apple.message) > 0 ? apple.message : "empty");
     }
@@ -83,14 +88,7 @@ int main()
 
 void processApple(void)
 {
-    // Listen for the apple and check whether it belongs
-    pid_t pid = fork();
-    if(pid == 0) //child
-    {
-        while(1)
-        {
-            apple_t apple;
-            int bytesRead = read(node.receive[READ], &apple, sizeof(apple_t));
+            if(apple.header == node.id){
             printf("Node %d has received the apple from %d\n", node.id, apple.lastHeldBy);
             if(apple.header == node.id)
             {
@@ -103,6 +101,10 @@ void processApple(void)
 
             // Pass apple to next node
             printf("Node %d has sent the Apple to Node: %d\n", node.id, (node.id+1) % nodeCount);
+            write(node.forward[WRITE], &apple, sizeof(apple_t)); 
+        }
+    }
+    exit(1);
             apple.lastHeldBy = node.id;
             write(node.forward[WRITE], &apple, sizeof(apple_t)); 
         }
@@ -114,6 +116,7 @@ void createChildrenNodes(int numNodes, node_t *parentNode, node_t *rootNode)
 
     node_t newNode;
     newNode.id = numNodes-1;
+
     if(newNode.id < 1){
         return;
     }
