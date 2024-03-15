@@ -1,3 +1,12 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab Nine sampleProgramOne.c
+
+Program fixes original buffer overflow issue
+with scanf function.
+******************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
