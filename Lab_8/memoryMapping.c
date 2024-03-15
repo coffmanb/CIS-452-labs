@@ -1,34 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Global variable initialized in data segment
-int global_data = 10;
+int globalVar = 10;
 
-// Function to recursively allocate memory on the stack
-void recursive_function(int depth) {
-    char stack_variable;
-    printf("Stack variable at depth %d: %p\n", depth, &stack_variable);
-    if (depth > 0) {
-        recursive_function(depth - 1);
-    }
-}
+void createStackFrames(int depth);
 
 int main() {
-    // Text segment
-    printf("Code segment (text): %p\n", (void*) main);
-
-    // Heap segment
-    int *heap_variable = malloc(sizeof(int));
-    printf("Heap variable: %p\n", (void*) heap_variable);
-
-    // Data segment
-    printf("Global variable (data): %p\n", (void*) &global_data);
     
-    // Stack segment
-    recursive_function(5);
 
-    // Free dynamically allocated memory
-    free(heap_variable);
+    printf("Stack Start\n");
+    createStackFrames(0);
+
+    int *dynamicVar = malloc(sizeof(int));
+    int *dynamicVar2 = malloc(sizeof(int));
+
+    printf("Heap variable 2: %p\n", dynamicVar2);
+    printf("Heap variable: %p\n", dynamicVar);
+    printf("Global variable (Data Segment): %p\n", &globalVar);
+    printf("Program (Text Segment): %p\n", main);
+
+    free(dynamicVar);
+    free(dynamicVar2);
 
     return 0;
+}
+
+void createStackFrames(int depth) {
+    char tempVar;
+    printf("tempVar at call %d: %p\n", depth, &tempVar);
+    if (depth < 5) {
+        createStackFrames(depth + 1);
+    }
 }
