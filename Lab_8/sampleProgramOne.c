@@ -10,7 +10,16 @@ int main()
 
     data1 = malloc(SIZE);
     printf("Please input username: ");
-    scanf("%s", data1);
+    fgets(data1, SIZE, stdin);
+    while(data1[strlen(data1)-1] != '\n')
+    {
+        char *tempData1 = malloc(strlen(data1) + SIZE);
+        memcpy(tempData1,data1,strlen(data1));
+        free(data1);
+        data1 = tempData1;
+        fgets(data1 + strlen(data1), SIZE, stdin);
+    }
+    data1[strlen(data1)-1] = '\0';
     printf("You entered: [%s]\n", data1);
     free(data1);
     return 0;
