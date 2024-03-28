@@ -1,9 +1,19 @@
+/*****************************************
+Brandon Baker, Brendan Coffman
+Dr. Bobeldyk
+Operating Systems Concepts
+Lab 10 sampleProgram.c
+
+Code demonstrates how virtual memory is
+used if program exceeds physical memory
+storage.
+******************************************/
 #include <stdio.h>
 #include <stdlib.h>
 
-#define COEFFICIENT 2
+#define COEFFICIENT 64
 #define KB 1024
-#define LOOP 200
+#define LOOP 1
 
 int main()
 {
